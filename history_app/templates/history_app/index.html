@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Historical AI</title>
+        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao&libraries=places&callback=initMap" async defer></script>
+        <style>
+            #map {
+                height: 400px;
+                width: 100%;
+            }
+        </style>
+    </head>
+<body>
+    <h1>History of Your Location</h1>
+    <p id="location"></p>
+    <button id="get-location">Get Location</button>
+    <div id="map"></div>
+    <div id="history_data"></div>
+    <script>
+        document.getElementById('get-location').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                document.getElementById('location').innerHTML = "Geolocation is not supported by this browser.";
+            }
+        });
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            document.getElementById('location').innerHTML = "Latitude: " + latitude + "<br>Longitude: " + longitude;
+            sendLocationToServer(latitude, longitude);
+        }
+
+        function sendLocationToServer(latitude, longitude) {
+            fetch('/get_history/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ latitude: latitude, longitude: longitude })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the history data
+                document.getElementById('location').innerHTML += "<br><br>" + data.history;
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function sendLocationToServer(latitude, longitude) {
+            fetch('/get_history/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ latitude: latitude, longitude: longitude })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Display the history data
+                document.getElementById('history_data').innerHTML = data.history;
+            })
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+                document.getElementById('history_data').innerHTML = "Error retrieving history.";
+            });
+        }
+
+        let map;
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: { lat: 0, lng: 0 }, // Default center
+            zoom: 8
+        });
+    }
+
+    document.getElementById('get-location').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            document.getElementById('location').innerHTML = "Geolocation is not supported by this browser.";
+        }
+    });
+
+    function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        document.getElementById('location').innerHTML = "Latitude: " + latitude + "<br>Longitude: " + longitude;
+        sendLocationToServer(latitude, longitude);
+
+        // Update the map
+        const location = { lat: latitude, lng: longitude };
+        map.setCenter(location);
+        new google.maps.Marker({ position: location, map: map });
+    }
+    </script>
+</body>
+</html>
