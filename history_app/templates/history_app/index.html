@@ -14,6 +14,10 @@
     <h1>History of Your Location</h1>
     <p id="location"></p>
     <button id="get-location">Get Location</button>
+    <form id="search-form">
+        <input type="text" id="search-input" placeholder="Enter a location">
+        <button type="submit">Search</button>
+    </form>
     <div id="map"></div>
     <div id="history_data"></div>
     <script>
@@ -115,6 +119,32 @@
         const location = { lat: latitude, lng: longitude };
         map.setCenter(location);
         new google.maps.Marker({ position: location, map: map });
+    }
+
+    document.getElementById('search-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+        const searchQuery = document.getElementById('search-input').value;
+        geocodeAndShowHistory(searchQuery);
+    });
+
+    function geocodeAndShowHistory(searchQuery) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'address': searchQuery }, function(results, status) {
+            if (status === 'OK' && results[0]) {
+                const location = results[0].geometry.location;
+                const latitude = location.lat();
+                const longitude = location.lng();
+
+                document.getElementById('location').innerHTML = "Search Result: " + searchQuery;
+                sendLocationToServer(latitude, longitude);
+
+                // Update the map
+                map.setCenter(location);
+                new google.maps.Marker({ position: location, map: map });
+            } else {
+                alert('Geocode was not successful for the following reason: ' + status);
+            }
+        });
     }
     </script>
 </body>
