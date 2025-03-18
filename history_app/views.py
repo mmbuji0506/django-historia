@@ -46,7 +46,7 @@ def get_historical_data(latitude, longitude):
         page = wikipedia.geosearch(latitude, longitude, results=1)
         if page:
             page_title = page[0]
-            page_content = wikipedia.summary(page_title, sentences=50)
+            page_content = wikipedia.summary(page_title, sentences=100)
             try:
                 images = wikipedia.page(page_title).images
                 image_urls = [img for img in images if img.lower().endswith(('.jpg', '.jpeg', '.png'))][:3]
@@ -56,7 +56,7 @@ def get_historical_data(latitude, longitude):
             page = wikipedia.geosearch(latitude, longitude, radius=5000, results=1)
             if page:
                 page_title = page[0]
-                page_content = wikipedia.summary(page_title, sentences=50)
+                page_content = wikipedia.summary(page_title, sentences=100)
                 try:
                     images = wikipedia.page(page_title).images
                     image_urls = [img for img in images if img.lower().endswith(('.jpg', '.jpeg', '.png'))][:3]
@@ -92,13 +92,13 @@ def get_historical_data(latitude, longitude):
         page = wikipedia.geosearch(latitude, longitude, results=1)
         if page:
             page_title = page[0]
-            page_content = wikipedia.summary(page_title, sentences=50)
+            page_content = wikipedia.summary(page_title, sentences=100)
             return page_content
         else:
             page = wikipedia.geosearch(latitude, longitude, radius = 5000, results = 1) #5km radius
             if page:
                 page_title = page[0]
-                page_content = wikipedia.summary(page_title, sentences=50)
+                page_content = wikipedia.summary(page_title, sentences=100)
                 return page_content
             else:
                 return "No historical data found for this location."
