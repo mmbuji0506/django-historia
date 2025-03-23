@@ -162,6 +162,23 @@
             box-shadow: var(--shadow);
         }
 
+        #narrate-history {
+            background: var(--btn-gradient);
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            color: #fff;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 1rem auto;
+            display: block;
+        }
+
+        #narrate-history:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
         #location {
             text-align: center;
             font-size: 1.1rem;
@@ -239,7 +256,7 @@
             #search-form {
                 width: 100%;
             }
-            .btn-primary, #get-location {
+            .btn-primary, #get-location, #narrate-history {
                 width: 100%;
             }
             #map {
@@ -292,6 +309,7 @@
         <section id="history-section">
             <div id="loading" style="display: none;">Loading...</div>
             <div id="history_data"></div>
+            <button id="narrate-history" aria-label="Listen to the history narration"><i class="fas fa-headphones"></i> Listen to History</button>
         </section>
     </main>
 
@@ -301,7 +319,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- JavaScript for Map, Geolocation, and History Fetching -->
+    <!-- JavaScript for Map, Geolocation, History Fetching, and Narration -->
     <script>
         let map;
 
@@ -443,6 +461,38 @@
                 document.getElementById('theme-text').textContent = 'Light Mode';
             }
         });
+
+        // Narrator functionality
+        document.getElementById('narrate-history').addEventListener('click', function() {
+            const historyText = document.getElementById('history_data').innerText.trim();
+
+            if (!historyText || historyText === "Error retrieving history.") {
+                alert("No history data available to narrate. Please search for a location first.");
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+
+                const speech = new SpeechSynthesisUtterance(historyText);
+                speech.lang = "en-US";
+                speech.rate = 1.0;
+                speech.pitch = 1.0;
+                // Use a default voice (you can customize this further if needed)
+                const voices = window.speechSynthesis.getVoices();
+                speech.voice = voices.find(voice => voice.lang === "en-US") || voices[0];
+
+                window.speechSynthesis.speak(speech);
+            } else {
+                alert("Text-to-Speech is not supported in this browser.");
+            }
+        });
+
+        // Ensure voices are loaded before narration (for some browsers)
+        window.speechSynthesis.onvoiceschanged = function() {
+            const voices = window.speechSynthesis.getVoices();
+        };
     </script>
 </body>
 </html>
